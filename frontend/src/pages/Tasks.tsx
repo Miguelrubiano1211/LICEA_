@@ -61,6 +61,7 @@ const Tasks: React.FC = () => {
     description: '',
     instructions: '',
     course_id: '',
+    start_date: '',
     due_date: '',
     max_grade: 10,
     submission_type: 'both',
@@ -76,6 +77,9 @@ const Tasks: React.FC = () => {
     grade: 0,
     feedback: ''
   });
+
+  // Valor mínimo para fechas (no permitir fechas vencidas)
+  const minDateTime = new Date().toISOString().slice(0, 16);
 
   useEffect(() => {
     fetchTasks();
@@ -136,6 +140,34 @@ const Tasks: React.FC = () => {
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validar fechas: inicio y fin no vencidas y fin >= inicio
+    const now = new Date();
+
+    if (taskForm.start_date) {
+      const start = new Date(taskForm.start_date);
+      if (start <= now) {
+        alert('La fecha y hora de inicio debe ser mayor a la fecha y hora actual.');
+        return;
+      }
+    }
+
+    if (taskForm.due_date) {
+      const end = new Date(taskForm.due_date);
+      if (end <= now) {
+        alert('La fecha de entrega debe ser mayor a la fecha y hora actual.');
+        return;
+      }
+
+      if (taskForm.start_date) {
+        const start = new Date(taskForm.start_date);
+        if (end <= start) {
+          alert('La fecha de entrega debe ser mayor a la fecha de inicio de la tarea.');
+          return;
+        }
+      }
+    }
+
     try {
       const token = localStorage.getItem('licea_access_token');
       const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -152,6 +184,7 @@ const Tasks: React.FC = () => {
         description: '',
         instructions: '',
         course_id: '',
+        start_date: '',
         due_date: '',
         max_grade: 10,
         submission_type: 'both',
@@ -370,7 +403,7 @@ const Tasks: React.FC = () => {
                     }}
                     className="btn-primary text-sm"
                   >
-                    Entregar
+                    Entregar tarea
                   </button>
                 )}
               </div>
@@ -392,20 +425,27 @@ const Tasks: React.FC = () => {
 
       {/* Modal crear tarea */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">Crear Tarea</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]">
+          <div className="bg-gradient-to-br from-primary-50 to-white rounded-3xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto border border-primary-100">
+            <div className="p-6 space-y-4">
+              <div className="flex justify-between items-center mb-4 border-b border-primary-100 pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-primary-600 flex items-center justify-center text-xl shadow-md text-white">
+                    📝
+                  </div>
+                  <h2 className="text-2xl font-extrabold text-primary-800 tracking-tight">
+                    Crear Tarea
+                  </h2>
+                </div>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition"
                 >
                   ✕
                 </button>
               </div>
               
-              <form onSubmit={handleCreateTask} className="space-y-4">
+              <form onSubmit={handleCreateTask} className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Curso *
@@ -414,7 +454,7 @@ const Tasks: React.FC = () => {
                     required
                     value={taskForm.course_id}
                     onChange={(e) => setTaskForm({...taskForm, course_id: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md"
+                    className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                   >
                     <option value="">Selecciona un curso</option>
                     {myCourses.map((course) => (
@@ -435,7 +475,7 @@ const Tasks: React.FC = () => {
                     value={taskForm.title}
                     onChange={(e) => setTaskForm({...taskForm, title: e.target.value})}
                     placeholder="Ej: Tarea 1 - Variables en Python"
-                    className="w-full px-3 py-2 border rounded-md"
+                    className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                   />
                 </div>
 
@@ -449,7 +489,7 @@ const Tasks: React.FC = () => {
                     onChange={(e) => setTaskForm({...taskForm, description: e.target.value})}
                     rows={3}
                     placeholder="Descripción breve de la tarea"
-                    className="w-full px-3 py-2 border rounded-md"
+                    className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                   />
                 </div>
 
@@ -462,11 +502,25 @@ const Tasks: React.FC = () => {
                     onChange={(e) => setTaskForm({...taskForm, instructions: e.target.value})}
                     rows={4}
                     placeholder="Instrucciones detalladas para los estudiantes"
-                    className="w-full px-3 py-2 border rounded-md"
+                    className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Fecha de Inicio *
+                    </label>
+                    <input
+                      type="datetime-local"
+                      required
+                      min={minDateTime}
+                      value={taskForm.start_date}
+                      onChange={(e) => setTaskForm({ ...taskForm, start_date: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Fecha de Entrega *
@@ -474,9 +528,10 @@ const Tasks: React.FC = () => {
                     <input
                       type="datetime-local"
                       required
+                      min={minDateTime}
                       value={taskForm.due_date}
-                      onChange={(e) => setTaskForm({...taskForm, due_date: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-md"
+                      onChange={(e) => setTaskForm({ ...taskForm, due_date: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                     />
                   </div>
 
@@ -510,7 +565,7 @@ const Tasks: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4 border-t">
+                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100 mt-2">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
@@ -530,8 +585,8 @@ const Tasks: React.FC = () => {
 
       {/* Modal entregar tarea */}
       {showSubmitModal && selectedTask && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full border border-gray-200">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">Entregar Tarea</h2>
@@ -602,9 +657,9 @@ const Tasks: React.FC = () => {
       )}
 
       {/* Modal detalles de tarea */}
-      {selectedTask && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      {selectedTask && !showSubmitModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto border border-gray-200">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <div>
@@ -633,7 +688,7 @@ const Tasks: React.FC = () => {
                 </div>
                 <div>
                   <p>
-                    📂 Tipo de entrega:{' '}
+                    📂 Tipo de entrega{' '}
                     {selectedTask.submission_type === 'file'
                       ? 'Solo archivo'
                       : selectedTask.submission_type === 'text'
@@ -708,14 +763,6 @@ const Tasks: React.FC = () => {
                       <p className="text-sm text-gray-700">
                         Aún no has entregado esta tarea.
                       </p>
-                      <button
-                        onClick={() => {
-                          setShowSubmitModal(true);
-                        }}
-                        className="btn-primary text-sm"
-                      >
-                        Entregar ahora
-                      </button>
                     </div>
                   )}
                 </div>

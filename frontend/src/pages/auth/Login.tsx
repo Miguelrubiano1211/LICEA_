@@ -58,13 +58,7 @@ const Login: React.FC = () => {
             Bienvenido de nuevo
           </h2>
           <p className="text-gray-600">
-            ¿No tienes cuenta?{' '}
-            <Link
-              to="/register"
-              className="font-semibold text-primary-600 hover:text-primary-500 transition-colors"
-            >
-              Regístrate aquí
-            </Link>
+            Ingresa tus credenciales para acceder a tu cuenta.
           </p>
         </div>
 
@@ -147,18 +141,9 @@ const Login: React.FC = () => {
                 Recordarme
               </label>
             </div>
-
-            <div className="text-sm">
-              <Link
-                to="/forgot-password"
-                className="font-semibold text-primary-600 hover:text-primary-500 transition-colors"
-              >
-                ¿Olvidaste tu contraseña?
-              </Link>
-            </div>
           </div>
 
-          <div className="pt-4">
+          <div className="pt-4 space-y-3">
             <button
               type="submit"
               disabled={isLoading}
@@ -176,6 +161,20 @@ const Login: React.FC = () => {
                 </>
               )}
             </button>
+
+            <Link
+              to="/forgot-password"
+              className="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-sm font-semibold rounded-lg text-primary-600 bg-primary-50 hover:bg-primary-100 transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+
+            <Link
+              to="/register"
+              className="w-full inline-flex justify-center items-center px-4 py-3 border border-primary-200 text-sm font-semibold rounded-lg text-primary-700 bg-white hover:bg-primary-50 transition-colors"
+            >
+              Regístrate aquí
+            </Link>
           </div>
         </form>
 
