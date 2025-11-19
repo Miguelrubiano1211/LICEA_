@@ -145,7 +145,7 @@ const InstructorDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-primary-700">
           Bienvenido, {user?.name}
         </h1>
         <p className="text-gray-600 mt-1">
@@ -155,7 +155,7 @@ const InstructorDashboard: React.FC = () => {
 
       {/* Estadísticas Principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card">
+        <div className="card-primary">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Cursos Activos</p>
@@ -174,16 +174,16 @@ const InstructorDashboard: React.FC = () => {
           </Link>
         </div>
 
-        <div className="card">
+        <div className="card-success">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Estudiantes</p>
-              <p className="text-3xl font-bold text-blue-600 mt-2">
+              <p className="text-sm font-medium text-secondary-700">Total Estudiantes</p>
+              <p className="text-3xl font-bold text-success-600 mt-2">
                 {stats.totalStudents}
               </p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-success-100 rounded-full">
+              <svg className="w-8 h-8 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
@@ -193,16 +193,16 @@ const InstructorDashboard: React.FC = () => {
           </p>
         </div>
 
-        <div className="card">
+        <div className="card-warning">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Por Calificar</p>
-              <p className="text-3xl font-bold text-orange-600 mt-2">
+              <p className="text-sm font-medium text-secondary-700">Por Calificar</p>
+              <p className="text-3xl font-bold text-warning-600 mt-2">
                 {stats.pendingGrades}
               </p>
             </div>
-            <div className="p-3 bg-orange-100 rounded-full">
-              <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-warning-100 rounded-full">
+              <svg className="w-8 h-8 text-warning-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
@@ -212,16 +212,16 @@ const InstructorDashboard: React.FC = () => {
           </Link>
         </div>
 
-        <div className="card">
+        <div className="card-success">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Promedio General</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">
+              <p className="text-sm font-medium text-secondary-700">Promedio General</p>
+              <p className="text-3xl font-bold text-success-600 mt-2">
                 {stats.averageGrade > 0 ? stats.averageGrade.toFixed(1) : '—'}
               </p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-success-100 rounded-full">
+              <svg className="w-8 h-8 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
@@ -234,16 +234,16 @@ const InstructorDashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Cursos Activos */}
-        <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Mis Cursos</h2>
+        <div className="card-muted">
+          <h2 className="text-xl font-semibold text-primary-700 mb-4">Mis Cursos</h2>
           {stats.activeCourses.length > 0 ? (
             <div className="space-y-3">
               {stats.activeCourses.map((course) => (
-                <div key={course.id} className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div key={course.id} className="p-3 bg-white rounded-lg hover:bg-primary-50 transition-colors border border-gray-200">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="font-medium text-gray-900">{course.name}</h3>
-                      <p className="text-sm text-gray-600">{course.code}</p>
+                      <h3 className="font-medium text-secondary-900">{course.name}</h3>
+                      <p className="text-sm text-secondary-700">{course.code}</p>
                     </div>
                     <span className="text-xs px-2 py-1 bg-primary-100 text-primary-800 rounded-full">
                       {course.current_students}/{course.max_students} estudiantes
@@ -263,12 +263,12 @@ const InstructorDashboard: React.FC = () => {
         </div>
 
         {/* Próximas Clases */}
-        <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Próximas Clases</h2>
+        <div className="card-muted">
+          <h2 className="text-xl font-semibold text-primary-700 mb-4">Próximas Clases</h2>
           {stats.upcomingClasses.length > 0 ? (
             <div className="space-y-3">
               {stats.upcomingClasses.map((schedule) => (
-                <div key={schedule.id} className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-600">
+                <div key={schedule.id} className="p-3 bg-primary-50 rounded-lg border-l-4 border-primary-600">
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-medium text-gray-900">{schedule.course_code}</p>
@@ -296,17 +296,17 @@ const InstructorDashboard: React.FC = () => {
       </div>
 
       {/* Tareas Recientes */}
-      <div className="card">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Tareas Recientes</h2>
+        <div className="card-muted">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-primary-700">Tareas Recientes</h2>
           <Link to="/dashboard/tasks" className="text-sm text-primary-600 hover:underline">
             Ver todas →
           </Link>
         </div>
         {stats.recentTasks.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="table">
+              <thead className="table-header">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tarea</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Curso</th>
@@ -314,16 +314,16 @@ const InstructorDashboard: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entregas</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="table-body">
                 {stats.recentTasks.map((task) => (
-                  <tr key={task.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{task.title}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{task.course_name}</td>
+                  <tr key={task.id} className="hover:bg-primary-50">
+                    <td className="px-4 py-3 text-sm font-medium text-secondary-900">{task.title}</td>
+                    <td className="px-4 py-3 text-sm text-secondary-700">{task.course_name}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {new Date(task.due_date).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                      <span className="px-2 py-1 bg-success-100 text-success-800 rounded-full text-xs">
                         {task.submitted_count || 0} entregas
                       </span>
                     </td>
@@ -343,19 +343,19 @@ const InstructorDashboard: React.FC = () => {
       </div>
 
       {/* Accesos Rápidos */}
-      <div className="card">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Accesos Rápidos</h2>
+      <div className="card-muted">
+        <h2 className="text-xl font-semibold text-primary-700 mb-4">Accesos Rápidos</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link to="/dashboard/courses" className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors text-center">
             <div className="text-primary-600 text-2xl mb-2">📚</div>
             <p className="text-sm font-medium text-gray-900">Cursos</p>
           </Link>
-          <Link to="/dashboard/tasks" className="p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors text-center">
-            <div className="text-orange-600 text-2xl mb-2">📝</div>
+          <Link to="/dashboard/tasks" className="p-4 bg-warning-50 rounded-lg hover:bg-warning-100 transition-colors text-center">
+            <div className="text-warning-600 text-2xl mb-2">📝</div>
             <p className="text-sm font-medium text-gray-900">Tareas</p>
           </Link>
-          <Link to="/dashboard/schedule" className="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-center">
-            <div className="text-blue-600 text-2xl mb-2">📅</div>
+          <Link to="/dashboard/schedule" className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors text-center">
+            <div className="text-primary-600 text-2xl mb-2">📅</div>
             <p className="text-sm font-medium text-gray-900">Cronograma</p>
           </Link>
           <Link to="/dashboard/groups" className="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-center">

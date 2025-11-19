@@ -73,7 +73,7 @@
   }
   
   .card {
-    @apply bg-white overflow-hidden shadow rounded-lg;
+    @apply bg-white overflow-hidden shadow rounded-lg border border-gray-200;
   }
   
   .card-header {
@@ -82,6 +82,31 @@
   
   .card-body {
     @apply px-4 py-5 sm:p-6;
+  }
+  
+  /* Variantes de tarjetas basadas en la paleta */
+  .card-primary {
+    @apply card bg-primary-50 border-primary-200;
+  }
+  
+  .card-secondary {
+    @apply card bg-secondary-900 text-secondary-100 border-secondary-700;
+  }
+  
+  .card-success {
+    @apply card bg-success-50 border-success-200;
+  }
+  
+  .card-warning {
+    @apply card bg-warning-50 border-warning-200;
+  }
+  
+  .card-danger {
+    @apply card bg-danger-50 border-danger-200;
+  }
+  
+  .card-muted {
+    @apply card bg-secondary-50 border-secondary-200;
   }
   
   .table {

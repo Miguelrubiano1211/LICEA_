@@ -7,6 +7,8 @@ const ProfileSettings: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -23,6 +25,7 @@ const ProfileSettings: React.FC = () => {
         phone: (user as any).phone || '',
         bio: (user as any).bio || ''
       });
+      setProfileImageUrl((user as any).profile_image || null);
     }
   }, [user]);
 
@@ -49,9 +52,55 @@ const ProfileSettings: React.FC = () => {
       setSuccess('¡Perfil actualizado exitosamente! 🎉');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al actualizar el perfil');
+      const msg =
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        'Error al actualizar el perfil';
+      setError(msg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+
+    setUploadingImage(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const token = localStorage.getItem('licea_access_token');
+      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+      const formDataToSend = new FormData();
+      formDataToSend.append('profile_image', file);
+
+      const response = await axios.put(
+        `${baseURL}/users/profile-picture`,
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      const newImage = response.data?.data?.profile_image;
+      if (newImage) {
+        setProfileImageUrl(newImage);
+      }
+      setSuccess('Foto de perfil actualizada exitosamente');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        'Error al subir la foto de perfil';
+      setError(msg);
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -87,8 +136,16 @@ const ProfileSettings: React.FC = () => {
         {/* Avatar section */}
         <div className="bg-gradient-to-r from-primary-500 to-accent-500 px-8 py-12 text-center">
           <div className="inline-block">
-            <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center text-6xl font-bold text-primary-600 shadow-2xl border-4 border-white">
-              {user?.name?.charAt(0).toUpperCase()}
+            <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center text-6xl font-bold text-primary-600 shadow-2xl border-4 border-white overflow-hidden">
+              {profileImageUrl ? (
+                <img
+                  src={`${(process.env.REACT_APP_API_URL || 'http://localhost:3001/api').replace(/\/api$/, '')}${profileImageUrl}`}
+                  alt="Foto de perfil"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{user?.name?.charAt(0).toUpperCase()}</span>
+              )}
             </div>
           </div>
           <h2 className="mt-4 text-2xl font-bold text-white">{user?.name}</h2>
@@ -96,6 +153,20 @@ const ProfileSettings: React.FC = () => {
           <div className="mt-3 inline-block px-4 py-1 bg-white/20 rounded-full text-white text-sm font-medium">
             {user?.role === 'student' ? '🎓 Estudiante' : 
              user?.role === 'instructor' ? '👨‍🏫 Instructor' : '👑 Administrador'}
+          </div>
+          <div className="mt-4 flex flex-col items-center space-y-2">
+            <label className="cursor-pointer inline-flex items-center px-4 py-2 bg-white text-primary-700 text-sm font-semibold rounded-full shadow hover:bg-primary-50">
+              <span>📷 Cambiar foto de perfil</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleProfileImageChange}
+                className="hidden"
+              />
+            </label>
+            {uploadingImage && (
+              <p className="text-xs text-primary-100">Subiendo imagen...</p>
+            )}
           </div>
         </div>
 

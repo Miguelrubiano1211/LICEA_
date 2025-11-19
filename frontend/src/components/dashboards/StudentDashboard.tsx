@@ -158,7 +158,7 @@ const StudentDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-primary-700">
           Bienvenido, {user?.name}
         </h1>
         <p className="text-gray-600 mt-1">
@@ -168,7 +168,7 @@ const StudentDashboard: React.FC = () => {
 
       {/* Estadísticas Principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card">
+        <div className="card-primary">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Cursos Inscritos</p>
@@ -187,16 +187,16 @@ const StudentDashboard: React.FC = () => {
           </Link>
         </div>
 
-        <div className="card">
+        <div className="card-warning">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Tareas Pendientes</p>
-              <p className="text-3xl font-bold text-orange-600 mt-2">
+              <p className="text-sm font-medium text-secondary-700">Tareas Pendientes</p>
+              <p className="text-3xl font-bold text-warning-600 mt-2">
                 {stats.pendingTasks}
               </p>
             </div>
-            <div className="p-3 bg-orange-100 rounded-full">
-              <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-warning-100 rounded-full">
+              <svg className="w-8 h-8 text-warning-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
@@ -206,16 +206,16 @@ const StudentDashboard: React.FC = () => {
           </Link>
         </div>
 
-        <div className="card">
+        <div className="card-success">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Tareas Completadas</p>
-              <p className="text-3xl font-bold text-blue-600 mt-2">
+              <p className="text-sm font-medium text-secondary-700">Tareas Completadas</p>
+              <p className="text-3xl font-bold text-success-600 mt-2">
                 {stats.completedTasks}
               </p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-success-100 rounded-full">
+              <svg className="w-8 h-8 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -225,16 +225,16 @@ const StudentDashboard: React.FC = () => {
           </p>
         </div>
 
-        <div className="card">
+        <div className="card-success">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Promedio General</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">
+              <p className="text-sm font-medium text-secondary-700">Promedio General</p>
+              <p className="text-3xl font-bold text-success-600 mt-2">
                 {stats.averageGrade > 0 ? stats.averageGrade.toFixed(1) : '—'}
               </p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-success-100 rounded-full">
+              <svg className="w-8 h-8 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
               </svg>
             </div>
@@ -247,12 +247,12 @@ const StudentDashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Mis Cursos */}
-        <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Mis Cursos</h2>
+        <div className="card-muted">
+          <h2 className="text-xl font-semibold text-primary-700 mb-4">Mis Cursos</h2>
           {stats.myCourses.length > 0 ? (
             <div className="space-y-3">
               {stats.myCourses.map((course) => (
-                <div key={course.id} className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div key={course.id} className="p-3 bg-white rounded-lg hover:bg-primary-50 transition-colors border border-gray-200">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-medium text-gray-900">{course.name}</h3>
@@ -276,12 +276,12 @@ const StudentDashboard: React.FC = () => {
         </div>
 
         {/* Próximas Clases */}
-        <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Próximas Clases</h2>
+        <div className="card-muted">
+          <h2 className="text-xl font-semibold text-primary-700 mb-4">Próximas Clases</h2>
           {stats.upcomingClasses.length > 0 ? (
             <div className="space-y-3">
               {stats.upcomingClasses.map((schedule, index) => (
-                <div key={index} className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-600">
+                <div key={index} className="p-3 bg-primary-50 rounded-lg border-l-4 border-primary-600">
                   <p className="font-medium text-gray-900">{schedule.course_code}</p>
                   <p className="text-sm text-gray-600">{schedule.course_title}</p>
                   <p className="text-xs text-gray-500 mt-1">
@@ -305,9 +305,9 @@ const StudentDashboard: React.FC = () => {
       </div>
 
       {/* Tareas Próximas */}
-      <div className="card">
+      <div className="card-warning">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Tareas Próximas</h2>
+          <h2 className="text-xl font-semibold text-primary-700">Tareas Próximas</h2>
           <Link to="/dashboard/tasks" className="text-sm text-primary-600 hover:underline">
             Ver todas →
           </Link>
@@ -315,7 +315,7 @@ const StudentDashboard: React.FC = () => {
         {stats.upcomingTasks.length > 0 ? (
           <div className="space-y-3">
             {stats.upcomingTasks.map((task) => (
-              <div key={task.id} className="p-4 bg-yellow-50 border-l-4 border-yellow-600 rounded">
+              <div key={task.id} className="p-4 bg-warning-50 border-l-4 border-warning-600 rounded">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">{task.title}</h3>
@@ -343,17 +343,17 @@ const StudentDashboard: React.FC = () => {
       </div>
 
       {/* Calificaciones Recientes */}
-      <div className="card">
+      <div className="card-muted">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Calificaciones Recientes</h2>
+          <h2 className="text-xl font-semibold text-primary-700">Calificaciones Recientes</h2>
           <Link to="/dashboard/grades" className="text-sm text-primary-600 hover:underline">
             Ver todas →
           </Link>
         </div>
         {stats.recentGrades.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="table">
+              <thead className="table-header">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tarea</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Curso</th>
@@ -361,17 +361,17 @@ const StudentDashboard: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Retroalimentación</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="table-body">
                 {stats.recentGrades.map((grade, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
+                  <tr key={index} className="hover:bg-primary-50">
                     <td className="px-4 py-3 text-sm font-medium text-gray-900">{grade.task_title}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{grade.course_name}</td>
                     <td className="px-4 py-3 text-sm">
                       <span className={`font-bold ${
-                        grade.grade >= grade.max_grade * 0.9 ? 'text-green-600' :
-                        grade.grade >= grade.max_grade * 0.7 ? 'text-blue-600' :
-                        grade.grade >= grade.max_grade * 0.6 ? 'text-yellow-600' :
-                        'text-red-600'
+                        grade.grade >= grade.max_grade * 0.9 ? 'text-success-600' :
+                        grade.grade >= grade.max_grade * 0.7 ? 'text-primary-600' :
+                        grade.grade >= grade.max_grade * 0.6 ? 'text-warning-600' :
+                        'text-danger-600'
                       }`}>
                         {grade.grade}/{grade.max_grade}
                       </span>
@@ -393,23 +393,23 @@ const StudentDashboard: React.FC = () => {
       </div>
 
       {/* Accesos Rápidos */}
-      <div className="card">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Accesos Rápidos</h2>
+      <div className="card-muted">
+        <h2 className="text-xl font-semibold text-primary-700 mb-4">Accesos Rápidos</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link to="/dashboard/courses" className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors text-center">
             <div className="text-primary-600 text-2xl mb-2">📚</div>
             <p className="text-sm font-medium text-gray-900">Mis Cursos</p>
           </Link>
-          <Link to="/dashboard/tasks" className="p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors text-center">
-            <div className="text-orange-600 text-2xl mb-2">📝</div>
+          <Link to="/dashboard/tasks" className="p-4 bg-warning-50 rounded-lg hover:bg-warning-100 transition-colors text-center">
+            <div className="text-warning-600 text-2xl mb-2">📝</div>
             <p className="text-sm font-medium text-gray-900">Tareas</p>
           </Link>
-          <Link to="/dashboard/schedule" className="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-center">
-            <div className="text-blue-600 text-2xl mb-2">📅</div>
+          <Link to="/dashboard/schedule" className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors text-center">
+            <div className="text-primary-600 text-2xl mb-2">📅</div>
             <p className="text-sm font-medium text-gray-900">Cronograma</p>
           </Link>
-          <Link to="/dashboard/groups" className="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-center">
-            <div className="text-green-600 text-2xl mb-2">👥</div>
+          <Link to="/dashboard/groups" className="p-4 bg-success-50 rounded-lg hover:bg-success-100 transition-colors text-center">
+            <div className="text-success-600 text-2xl mb-2">👥</div>
             <p className="text-sm font-medium text-gray-900">Grupos</p>
           </Link>
         </div>

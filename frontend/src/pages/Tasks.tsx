@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
+const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+
 interface Task {
   id: number;
   title: string;
@@ -32,7 +34,9 @@ interface Submission {
   student_name?: string;
   task_id: number;
   submission_text?: string;
-  attachment_url?: string;
+  attachment_url?: string; // compatibilidad
+  file_path?: string;
+  file_url?: string;
   grade?: number;
   feedback?: string;
   status: string;
@@ -226,6 +230,15 @@ const Tasks: React.FC = () => {
     }
   };
 
+  const getSubmissionFileUrl = (submission: Submission): string | null => {
+    if (submission.file_url) return submission.file_url;
+    if (submission.attachment_url) return submission.attachment_url;
+    if (submission.file_path) {
+      return `${apiBaseUrl}/submissions/${submission.id}/download`;
+    }
+    return null;
+  };
+
   const getStatusBadge = (task: Task) => {
     if (user?.role === 'student') {
       if (task.my_submission) {
@@ -325,6 +338,18 @@ const Tasks: React.FC = () => {
                         <p className="text-sm text-blue-600 mt-1">
                           En espera de calificación
                         </p>
+                      </div>
+                    )}
+                    {getSubmissionFileUrl(task.my_submission) && (
+                      <div>
+                        <a
+                          href={getSubmissionFileUrl(task.my_submission)!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary-600 hover:underline"
+                        >
+                          📎 Ver archivo entregado
+                        </a>
                       </div>
                     )}
                   </div>
@@ -576,8 +601,8 @@ const Tasks: React.FC = () => {
         </div>
       )}
 
-      {/* Modal detalles de tarea (para instructor) */}
-      {selectedTask && user?.role === 'instructor' && (
+      {/* Modal detalles de tarea */}
+      {selectedTask && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
@@ -585,6 +610,9 @@ const Tasks: React.FC = () => {
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">{selectedTask.title}</h2>
                   <p className="text-gray-600">{selectedTask.course_name}</p>
+                  {selectedTask.instructor_name && (
+                    <p className="text-sm text-gray-500">👨‍🏫 {selectedTask.instructor_name}</p>
+                  )}
                 </div>
                 <button
                   onClick={() => {
@@ -597,73 +625,186 @@ const Tasks: React.FC = () => {
                 </button>
               </div>
 
-              {selectedTask.statistics && (
-                <div className="grid grid-cols-4 gap-4 mb-6">
-                  <div className="card text-center">
-                    <div className="text-2xl font-bold text-primary-600">
-                      {selectedTask.statistics.total_students}
-                    </div>
-                    <div className="text-sm text-gray-600">Estudiantes</div>
-                  </div>
-                  <div className="card text-center">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {selectedTask.statistics.submitted_count}
-                    </div>
-                    <div className="text-sm text-gray-600">Entregas</div>
-                  </div>
-                  <div className="card text-center">
-                    <div className="text-2xl font-bold text-green-600">
-                      {selectedTask.statistics.graded_count}
-                    </div>
-                    <div className="text-sm text-gray-600">Calificadas</div>
-                  </div>
-                  <div className="card text-center">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {selectedTask.statistics.average_grade != null 
-                        ? Number(selectedTask.statistics.average_grade).toFixed(1) 
-                        : '—'}
-                    </div>
-                    <div className="text-sm text-gray-600">Promedio</div>
-                  </div>
+              {/* Meta de la tarea */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm text-gray-700">
+                <div>
+                  <p>📅 Vence: {new Date(selectedTask.due_date).toLocaleString()}</p>
+                  <p>🎯 Puntos máximos: {selectedTask.max_grade}</p>
+                </div>
+                <div>
+                  <p>
+                    📂 Tipo de entrega:{' '}
+                    {selectedTask.submission_type === 'file'
+                      ? 'Solo archivo'
+                      : selectedTask.submission_type === 'text'
+                      ? 'Solo texto'
+                      : 'Texto y archivo'}
+                  </p>
+                  <p>{selectedTask.is_published ? '✅ Publicada' : '⏳ Borrador (no visible para estudiantes)'}</p>
+                </div>
+              </div>
+
+              {/* Descripción e instrucciones */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Descripción</h3>
+                <p className="text-sm text-gray-700 whitespace-pre-line">
+                  {selectedTask.description}
+                </p>
+              </div>
+
+              {selectedTask.instructions && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Instrucciones</h3>
+                  <p className="text-sm text-gray-700 whitespace-pre-line">
+                    {selectedTask.instructions}
+                  </p>
                 </div>
               )}
 
-              <h3 className="text-lg font-semibold mb-3">Entregas de Estudiantes</h3>
-              <div className="space-y-3">
-                {submissions.map((submission) => (
-                  <div key={submission.id} className="card flex justify-between items-center">
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">{submission.student_name}</p>
-                      <p className="text-sm text-gray-600">
-                        Entregado: {new Date(submission.submitted_at).toLocaleString()}
-                      </p>
-                      {submission.grade !== undefined && submission.grade !== null && (
-                        <p className="text-sm text-green-600 font-medium">
-                          Calificación: {submission.grade}/{selectedTask.max_grade}
-                        </p>
+              {/* Vista específica para estudiante */}
+              {user?.role === 'student' && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Mi estado</h3>
+                  {selectedTask.my_submission ? (
+                    <div className="space-y-2">
+                      {selectedTask.my_submission.grade !== undefined &&
+                      selectedTask.my_submission.grade !== null ? (
+                        <div className="p-3 bg-green-50 border-l-4 border-green-400 rounded">
+                          <p className="text-green-800 font-semibold">
+                            ✅ Calificación: {selectedTask.my_submission.grade}/{selectedTask.max_grade}
+                          </p>
+                          {selectedTask.my_submission.feedback && (
+                            <p className="text-sm text-green-700 mt-2">
+                              💬 Retroalimentación: {selectedTask.my_submission.feedback}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                          <p className="text-blue-800 font-medium">
+                            ✅ Entregada el{' '}
+                            {new Date(selectedTask.my_submission.submitted_at).toLocaleString()}
+                          </p>
+                          <p className="text-sm text-blue-600 mt-1">
+                            En espera de calificación
+                          </p>
+                        </div>
+                      )}
+                      {getSubmissionFileUrl(selectedTask.my_submission) && (
+                        <div>
+                          <a
+                            href={getSubmissionFileUrl(selectedTask.my_submission)!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary-600 hover:underline"
+                          >
+                            📎 Ver archivo entregado
+                          </a>
+                        </div>
                       )}
                     </div>
-                    <button
-                      onClick={() => {
-                        setSelectedSubmission(submission);
-                        setGradeForm({
-                          grade: submission.grade || 0,
-                          feedback: submission.feedback || ''
-                        });
-                        setShowGradeModal(true);
-                      }}
-                      className="btn-primary text-sm"
-                    >
-                      {submission.grade ? 'Revisar' : 'Calificar'}
-                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-700">
+                        Aún no has entregado esta tarea.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setShowSubmitModal(true);
+                        }}
+                        className="btn-primary text-sm"
+                      >
+                        Entregar ahora
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Vista específica para instructor/admin: estadísticas y entregas */}
+              {(user?.role === 'instructor' || user?.role === 'admin') && (
+                <>
+                  {selectedTask.statistics && (
+                    <div className="grid grid-cols-4 gap-4 mb-6">
+                      <div className="card text-center">
+                        <div className="text-2xl font-bold text-primary-600">
+                          {selectedTask.statistics.total_students}
+                        </div>
+                        <div className="text-sm text-gray-600">Estudiantes</div>
+                      </div>
+                      <div className="card text-center">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {selectedTask.statistics.submitted_count}
+                        </div>
+                        <div className="text-sm text-gray-600">Entregas</div>
+                      </div>
+                      <div className="card text-center">
+                        <div className="text-2xl font-bold text-green-600">
+                          {selectedTask.statistics.graded_count}
+                        </div>
+                        <div className="text-sm text-gray-600">Calificadas</div>
+                      </div>
+                      <div className="card text-center">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {selectedTask.statistics.average_grade != null 
+                            ? Number(selectedTask.statistics.average_grade).toFixed(1) 
+                            : '—'}
+                        </div>
+                        <div className="text-sm text-gray-600">Promedio</div>
+                      </div>
+                    </div>
+                  )}
+
+                  <h3 className="text-lg font-semibold mb-3">Entregas de Estudiantes</h3>
+                  <div className="space-y-3">
+                    {submissions.map((submission) => (
+                      <div key={submission.id} className="card flex justify-between items-center">
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">{submission.student_name}</p>
+                          <p className="text-sm text-gray-600">
+                            Entregado: {new Date(submission.submitted_at).toLocaleString()}
+                          </p>
+                          {getSubmissionFileUrl(submission) && (
+                            <p className="text-sm mt-1">
+                              <a
+                                href={getSubmissionFileUrl(submission)!}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary-600 hover:underline"
+                              >
+                                📎 Ver archivo
+                              </a>
+                            </p>
+                          )}
+                          {submission.grade !== undefined && submission.grade !== null && (
+                            <p className="text-sm text-green-600 font-medium mt-1">
+                              Calificación: {submission.grade}/{selectedTask.max_grade}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSelectedSubmission(submission);
+                            setGradeForm({
+                              grade: submission.grade || 0,
+                              feedback: submission.feedback || ''
+                            });
+                            setShowGradeModal(true);
+                          }}
+                          className="btn-primary text-sm"
+                        >
+                          {submission.grade ? 'Revisar' : 'Calificar'}
+                        </button>
+                      </div>
+                    ))}
+                    {submissions.length === 0 && (
+                      <p className="text-center text-gray-500 py-8">
+                        No hay entregas aún
+                      </p>
+                    )}
                   </div>
-                ))}
-                {submissions.length === 0 && (
-                  <p className="text-center text-gray-500 py-8">
-                    No hay entregas aún
-                  </p>
-                )}
-              </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -698,16 +839,16 @@ const Tasks: React.FC = () => {
                 </div>
               )}
 
-              {selectedSubmission.attachment_url && (
+              {getSubmissionFileUrl(selectedSubmission) && (
                 <div className="mb-4">
                   <h3 className="text-sm font-medium text-gray-700 mb-2">Archivo Adjunto:</h3>
                   <a 
-                    href={selectedSubmission.attachment_url} 
+                    href={getSubmissionFileUrl(selectedSubmission)!} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-primary-600 hover:underline"
                   >
-                    📎 Descargar archivo
+                    📎 Ver/Descargar archivo
                   </a>
                 </div>
               )}

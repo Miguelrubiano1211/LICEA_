@@ -28,9 +28,9 @@ const ResetPassword: React.FC = () => {
 
   if (!email) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-25 to-accent-25 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-primary-200/50 p-8 text-center">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center">
             <div className="text-6xl mb-6">❌</div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Acceso Inválido</h2>
             <p className="text-gray-600 mb-8">
@@ -38,7 +38,7 @@ const ResetPassword: React.FC = () => {
             </p>
             <Link 
               to="/forgot-password" 
-              className="inline-block bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105"
+              className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
             >
               Recuperar Contraseña
             </Link>
@@ -71,9 +71,9 @@ const ResetPassword: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-25 to-accent-25 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-primary-200/50 p-8 text-center">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center">
             <div className="text-6xl mb-6">✅</div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">¡Contraseña Restablecida!</h2>
             <p className="text-gray-600 mb-6">
@@ -84,7 +84,7 @@ const ResetPassword: React.FC = () => {
             </p>
             <Link 
               to="/login" 
-              className="inline-block bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105"
+              className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
             >
               Ir a Iniciar Sesión
             </Link>
@@ -95,18 +95,18 @@ const ResetPassword: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-25 to-accent-25 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex items-center justify-center space-x-4 mb-6">
             <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden">
+              <div className="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
                 <img src="/images/logo-gato.png" alt="LICEA Logo" className="w-12 h-12 object-contain" />
               </div>
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-accent-400 rounded-full flex items-center justify-center text-xs text-white font-bold shadow-lg animate-pulse">L</div>
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-accent-500 rounded-full flex items-center justify-center text-xs text-white font-bold shadow-md">L</div>
             </div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-700 to-accent-600 bg-clip-text text-transparent">LICEA</h1>
+              <h1 className="text-4xl font-bold text-primary-700">LICEA</h1>
               <p className="text-sm text-gray-600 font-medium">Sistema Educativo Integral</p>
             </div>
           </div>
@@ -114,9 +114,9 @@ const ResetPassword: React.FC = () => {
           <p className="text-gray-600">Ingresa tu nueva contraseña segura</p>
         </div>
 
-        <form className="mt-8 space-y-6 bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-primary-200/50 p-8" onSubmit={handleSubmit(onSubmit)}>
+        <form className="mt-8 space-y-6 bg-white rounded-2xl shadow-lg border border-gray-200 p-8" onSubmit={handleSubmit(onSubmit)}>
           {error && (
-            <div className="rounded-2xl bg-red-50 border-l-4 border-red-400 p-4">
+            <div className="rounded-lg bg-red-50 border-l-4 border-red-400 p-4">
               <div className="flex items-center">
                 <span className="text-2xl mr-3">⚠️</span>
                 <div className="text-sm text-red-700 font-medium">{error}</div>
@@ -157,7 +157,7 @@ const ResetPassword: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (<><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div><span>Restableciendo...</span></>) : (<><span>🔐</span><span>Restablecer Contraseña</span></>)}
             </button>

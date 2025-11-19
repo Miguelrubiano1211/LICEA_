@@ -133,6 +133,111 @@ router.get('/',
 
 /**
  * @swagger
+ * /api/users/profile:
+ *   put:
+ *     summary: Update user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.put('/profile',
+  verifyToken,
+  [
+    body('name').optional().trim().isLength({ min: 2, max: 255 }),
+    body('phone').optional().trim().isLength({ max: 20 }),
+    body('bio').optional().trim().isLength({ max: 1000 })
+  ],
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new APIError('Validation failed', 400, 'VALIDATION_ERROR');
+    }
+
+    const userId = req.user.id;
+    const { name, phone, bio } = req.body;
+
+    const updateFields = [];
+    const updateValues = [];
+
+    if (name) {
+      updateFields.push('name = ?');
+      updateValues.push(name);
+    }
+
+    if (phone !== undefined) {
+      updateFields.push('phone = ?');
+      updateValues.push(phone);
+    }
+
+    if (bio !== undefined) {
+      updateFields.push('bio = ?');
+      updateValues.push(bio);
+    }
+
+    if (updateFields.length === 0) {
+      throw new APIError('No fields to update', 400, 'NO_UPDATES');
+    }
+
+    updateValues.push(userId);
+
+    await executeQuery(`UPDATE users SET ${updateFields.join(', ')} WHERE id = ?`, updateValues);
+
+    // Obtener datos actualizados
+    const [updatedUser] = await executeQuery(`
+      SELECT id, name, email, role, phone, bio, institution_id
+      FROM users WHERE id = ?
+    `, [userId]);
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: updatedUser
+    });
+  })
+);
+
+/**
+ * @swagger
+ * /api/users/profile-picture:
+ *   put:
+ *     summary: Upload profile picture
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.put('/profile-picture',
+  verifyToken,
+  upload.single('profile_image'),
+  asyncHandler(async (req, res) => {
+    if (!req.file) {
+      throw new APIError('No se proporcionó ninguna imagen', 400, 'NO_FILE');
+    }
+
+    const userId = req.user.id;
+    const imageUrl = `/uploads/profiles/${req.file.filename}`;
+
+    // Eliminar imagen anterior si existe
+    const [oldUser] = await executeQuery('SELECT profile_image FROM users WHERE id = ?', [userId]);
+    if (oldUser && oldUser.profile_image) {
+      const oldImagePath = path.join(__dirname, '..', oldUser.profile_image);
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath);
+      }
+    }
+
+    // Actualizar con nueva imagen
+    await executeQuery('UPDATE users SET profile_image = ? WHERE id = ?', [imageUrl, userId]);
+
+    res.json({
+      success: true,
+      message: 'Foto de perfil actualizada exitosamente',
+      data: { profile_image: imageUrl }
+    });
+  })
+);
+
+/**
+ * @swagger
  * /api/users/{id}:
  *   get:
  *     summary: Get user by ID
@@ -759,110 +864,6 @@ router.put('/:id/role',
   })
 );
 
-/**
- * @swagger
- * /api/users/profile:
- *   put:
- *     summary: Update user profile
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- */
-router.put('/profile',
-  verifyToken,
-  [
-    body('name').optional().trim().isLength({ min: 2, max: 255 }),
-    body('phone').optional().trim().isLength({ max: 20 }),
-    body('bio').optional().trim().isLength({ max: 1000 })
-  ],
-  asyncHandler(async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      throw new APIError('Validation failed', 400, 'VALIDATION_ERROR');
-    }
-
-    const userId = req.user.id;
-    const { name, phone, bio } = req.body;
-
-    const updateFields = [];
-    const updateValues = [];
-
-    if (name) {
-      updateFields.push('name = ?');
-      updateValues.push(name);
-    }
-
-    if (phone !== undefined) {
-      updateFields.push('phone = ?');
-      updateValues.push(phone);
-    }
-
-    if (bio !== undefined) {
-      updateFields.push('bio = ?');
-      updateValues.push(bio);
-    }
-
-    if (updateFields.length === 0) {
-      throw new APIError('No fields to update', 400, 'NO_UPDATES');
-    }
-
-    updateValues.push(userId);
-
-    await executeQuery(`UPDATE users SET ${updateFields.join(', ')} WHERE id = ?`, updateValues);
-
-    // Obtener datos actualizados
-    const [updatedUser] = await executeQuery(`
-      SELECT id, name, email, role, phone, bio, institution_id
-      FROM users WHERE id = ?
-    `, [userId]);
-
-    res.json({
-      success: true,
-      message: 'Profile updated successfully',
-      data: updatedUser
-    });
-  })
-);
-
-/**
- * @swagger
- * /api/users/profile-picture:
- *   put:
- *     summary: Upload profile picture
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- */
-router.put('/profile-picture',
-  verifyToken,
-  upload.single('profile_image'),
-  asyncHandler(async (req, res) => {
-    if (!req.file) {
-      throw new APIError('No se proporcionó ninguna imagen', 400, 'NO_FILE');
-    }
-
-    const userId = req.user.id;
-    const imageUrl = `/uploads/profiles/${req.file.filename}`;
-
-    // Eliminar imagen anterior si existe
-    const [oldUser] = await executeQuery('SELECT profile_image FROM users WHERE id = ?', [userId]);
-    if (oldUser && oldUser.profile_image) {
-      const oldImagePath = path.join(__dirname, '..', oldUser.profile_image);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
-      }
-    }
-
-    // Actualizar con nueva imagen
-    await executeQuery('UPDATE users SET profile_image = ? WHERE id = ?', [imageUrl, userId]);
-
-    res.json({
-      success: true,
-      message: 'Foto de perfil actualizada exitosamente',
-      data: { profile_image: imageUrl }
-    });
-  })
-);
 
 /**
  * @swagger
