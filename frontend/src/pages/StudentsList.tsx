@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useToast } from '../context/ToastContext';
 
 interface Student {
   id: number;
@@ -14,6 +15,7 @@ interface Student {
 const StudentsList: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -31,7 +33,7 @@ const StudentsList: React.FC = () => {
       setStudents(response.data.data || []);
     } catch (error) {
       console.error('Error fetching students:', error);
-      alert('Error al cargar estudiantes');
+      showToast({ type: 'error', title: 'Error al cargar estudiantes' });
     } finally {
       setLoading(false);
     }

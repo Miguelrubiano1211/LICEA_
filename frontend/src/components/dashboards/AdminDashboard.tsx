@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useToast } from '../../context/ToastContext';
 
 interface DashboardStats {
   totalUsers: number;
@@ -21,6 +22,7 @@ const AdminDashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     fetchStats();
@@ -64,7 +66,11 @@ const AdminDashboard: React.FC = () => {
       console.error('Error fetching stats:', error);
       const errorMsg = error.response?.data?.message || error.message || 'Error al cargar datos';
       setError(errorMsg);
-      alert(`Error al cargar estadísticas: ${errorMsg}. Por favor, verifica que el servidor esté corriendo y recarga la página.`);
+      showToast({
+        type: 'error',
+        title: 'Error al cargar estadísticas',
+        message: `${errorMsg}. Por favor, verifica que el servidor esté corriendo y recarga la página.`,
+      });
     } finally {
       setLoading(false);
     }

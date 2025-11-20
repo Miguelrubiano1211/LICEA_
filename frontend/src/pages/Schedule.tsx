@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { useToast } from '../context/ToastContext';
+import api from '../services/api';
 
 interface Schedule {
   id: number;
@@ -29,6 +30,7 @@ const Schedule: React.FC = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { showToast } = useToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [myCourses, setMyCourses] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -51,14 +53,10 @@ const Schedule: React.FC = () => {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('licea_access_token');
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
-      const endpoint = user?.role === 'admin' ? `${baseURL}/schedules` : `${baseURL}/schedules/my`;
-      
-      const response = await axios.get(endpoint, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      const endpoint = user?.role === 'admin' ? '/schedules' : '/schedules/my';
+
+      const response = await api.get(endpoint);
+
       setSchedules(response.data.data || []);
     } catch (error) {
       setError('Error al cargar el cronograma');
@@ -70,11 +68,7 @@ const Schedule: React.FC = () => {
 
   const fetchMyCourses = async () => {
     try {
-      const token = localStorage.getItem('licea_access_token');
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
-      const response = await axios.get(`${baseURL}/courses/my/courses`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/courses/my/courses');
       setMyCourses(response.data.data || []);
     } catch (error) {
       console.error('Error fetching courses:', error);
@@ -84,13 +78,17 @@ const Schedule: React.FC = () => {
   const handleCreateSchedule = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('licea_access_token');
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
-      await axios.post(`${baseURL}/schedules`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      alert('¡Horario creado exitosamente!');
+      // Normalizar datos para que coincidan con lo que espera el backend y la BD
+      const payload = {
+        ...formData,
+        course_id: Number(formData.course_id),
+        start_time: formData.start_time.length === 5 ? `${formData.start_time}:00` : formData.start_time,
+        end_time: formData.end_time.length === 5 ? `${formData.end_time}:00` : formData.end_time,
+      };
+
+      await api.post('/schedules', payload);
+
+      showToast({ type: 'success', title: '¡Horario creado exitosamente!' });
       setShowCreateModal(false);
       setFormData({
         course_id: '',
@@ -102,24 +100,26 @@ const Schedule: React.FC = () => {
       });
       fetchSchedules();
     } catch (error: any) {
-      alert(error.response?.data?.error?.message || 'Error al crear el horario');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.error?.message || 'Error al crear el horario',
+      });
     }
   };
 
   const handleDeleteSchedule = async (scheduleId: number) => {
     if (!window.confirm('¿Estás seguro de eliminar este horario?')) return;
-    
+
     try {
-      const token = localStorage.getItem('licea_access_token');
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
-      await axios.delete(`${baseURL}/schedules/${scheduleId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      alert('Horario eliminado');
+      await api.delete(`/schedules/${scheduleId}`);
+
+      showToast({ type: 'success', title: 'Horario eliminado' });
       fetchSchedules();
     } catch (error: any) {
-      alert(error.response?.data?.error?.message || 'Error al eliminar');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.error?.message || 'Error al eliminar',
+      });
     }
   };
 

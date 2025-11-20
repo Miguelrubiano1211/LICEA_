@@ -10,7 +10,9 @@ const router = express.Router();
 const validateRequest = (req) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    throw new APIError('Validation failed', 400, 'VALIDATION_ERROR');
+    // Construir un mensaje más descriptivo para saber qué campo está fallando
+    const details = errors.array().map(err => `${err.param}: ${err.msg}`).join(', ');
+    throw new APIError(`Validation failed: ${details}`, 400, 'VALIDATION_ERROR');
   }
 };
 
@@ -237,8 +239,13 @@ router.post('/',
   [
     body('course_id').isInt().withMessage('Course ID must be an integer'),
     body('day_of_week').isIn(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']).withMessage('Invalid day of week'),
-    body('start_time').matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/).withMessage('Start time must be in HH:MM:SS format'),
-    body('end_time').matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/).withMessage('End time must be in HH:MM:SS format'),
+    // Aceptar horas en formato HH:MM o HH:MM:SS para mayor compatibilidad con inputs HTML "time"
+    body('start_time')
+      .matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/)
+      .withMessage('Start time must be in HH:MM or HH:MM:SS format'),
+    body('end_time')
+      .matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/)
+      .withMessage('End time must be in HH:MM or HH:MM:SS format'),
     body('location').optional().isString(),
     body('session_type').optional().isIn(['lecture', 'lab', 'seminar', 'workshop', 'exam']),
     body('specific_date').optional().isISO8601(),
@@ -315,8 +322,9 @@ router.put('/:id',
   [
     param('id').isInt().withMessage('Schedule ID must be an integer'),
     body('day_of_week').optional().isIn(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']),
-    body('start_time').optional().matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/),
-    body('end_time').optional().matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/),
+    // Aceptar horas en formato HH:MM o HH:MM:SS también al actualizar
+    body('start_time').optional().matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/),
+    body('end_time').optional().matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/),
     body('location').optional().isString(),
     body('session_type').optional().isIn(['lecture', 'lab', 'seminar', 'workshop', 'exam']),
     body('notes').optional().isString()

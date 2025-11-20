@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import axios from 'axios';
 
 interface Course {
@@ -21,6 +22,7 @@ interface Course {
 const CoursesPage: React.FC = () => {
   const { user } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -37,6 +39,11 @@ const CoursesPage: React.FC = () => {
     start_date: '',
     end_date: ''
   });
+
+  // No permitir fechas anteriores a hoy
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = today.toISOString().slice(0, 10);
 
   useEffect(() => {
     fetchCourses();
@@ -68,6 +75,47 @@ const CoursesPage: React.FC = () => {
 
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validaciones de fechas (no permitir cursos "vencidos")
+    if (formData.start_date) {
+      const start = new Date(formData.start_date);
+      start.setHours(0, 0, 0, 0);
+      if (start < today) {
+        showToast({
+          type: 'error',
+          title: 'Fecha de inicio inválida',
+          message: 'La fecha de inicio del curso no puede ser anterior a hoy.',
+        });
+        return;
+      }
+    }
+
+    if (formData.end_date) {
+      const end = new Date(formData.end_date);
+      end.setHours(0, 0, 0, 0);
+      if (end < today) {
+        showToast({
+          type: 'error',
+          title: 'Fecha de fin inválida',
+          message: 'La fecha de fin del curso no puede ser anterior a hoy.',
+        });
+        return;
+      }
+
+      if (formData.start_date) {
+        const start = new Date(formData.start_date);
+        start.setHours(0, 0, 0, 0);
+        if (end < start) {
+          showToast({
+            type: 'error',
+            title: 'Rango de fechas inválido',
+            message: 'La fecha de fin del curso debe ser igual o posterior a la fecha de inicio.',
+          });
+          return;
+        }
+      }
+    }
+
     try {
       const token = localStorage.getItem('licea_access_token');
       const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -75,6 +123,7 @@ const CoursesPage: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
+      showToast({ type: 'success', title: '¡Curso creado exitosamente!' });
       setShowCreateModal(false);
       setFormData({
         name: '',
@@ -87,9 +136,19 @@ const CoursesPage: React.FC = () => {
         end_date: ''
       });
       fetchCourses();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating course:', error);
-      alert('Error al crear el curso');
+      const backendMessage =
+        error?.response?.data?.error?.message ||
+        error?.response?.data?.message ||
+        error?.message ||
+        'Ocurrió un error al crear el curso.';
+
+      showToast({
+        type: 'error',
+        title: 'Error al crear el curso',
+        message: backendMessage,
+      });
     }
   };
 
@@ -101,10 +160,13 @@ const CoursesPage: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      alert('¡Inscripción exitosa!');
+      showToast({ type: 'success', title: '¡Inscripción exitosa!' });
       fetchCourses();
     } catch (error: any) {
-      alert(error.response?.data?.error?.message || 'Error al inscribirse');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.error?.message || 'Error al inscribirse',
+      });
     }
   };
 
@@ -118,12 +180,18 @@ const CoursesPage: React.FC = () => {
         { headers: { Authorization: `Bearer ${token}` }}
       );
       
-      alert(response.data.message || '¡Te has unido al curso!');
+      showToast({
+        type: 'success',
+        title: response.data.message || '¡Te has unido al curso!',
+      });
       setShowJoinModal(false);
       setJoinCode('');
       fetchCourses();
     } catch (error: any) {
-      alert(error.response?.data?.error?.message || 'Código inválido');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.error?.message || 'Código inválido',
+      });
     }
   };
 
@@ -255,20 +323,27 @@ const CoursesPage: React.FC = () => {
 
       {/* Modal para crear curso */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">Crear Nuevo Curso</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]">
+          <div className="bg-gradient-to-br from-primary-50 to-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-primary-100">
+            <div className="p-6 space-y-4">
+              <div className="flex justify-between items-center mb-4 border-b border-primary-100 pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-primary-600 flex items-center justify-center text-xl shadow-md text-white">
+                    📚
+                  </div>
+                  <h2 className="text-2xl font-extrabold text-primary-800 tracking-tight">
+                    Crear Nuevo Curso
+                  </h2>
+                </div>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition"
                 >
                   ✕
                 </button>
               </div>
               
-              <form onSubmit={handleCreateCourse} className="space-y-4">
+              <form onSubmit={handleCreateCourse} className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nombre del Curso *
@@ -278,7 +353,8 @@ const CoursesPage: React.FC = () => {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="Ej: Programación Básica en Python"
+                    className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                   />
                 </div>
 
@@ -291,7 +367,8 @@ const CoursesPage: React.FC = () => {
                     required
                     value={formData.code}
                     onChange={(e) => setFormData({...formData, code: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="Ej: CURS-101"
+                    className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                   />
                 </div>
 
@@ -303,7 +380,8 @@ const CoursesPage: React.FC = () => {
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     rows={3}
-                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="Describe brevemente el contenido del curso"
+                    className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                   />
                 </div>
 
@@ -316,7 +394,8 @@ const CoursesPage: React.FC = () => {
                       type="text"
                       value={formData.category}
                       onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-md"
+                      placeholder="Ej: Programación, Matemáticas, Idiomas"
+                      className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                     />
                   </div>
 
@@ -327,7 +406,7 @@ const CoursesPage: React.FC = () => {
                     <select
                       value={formData.level}
                       onChange={(e) => setFormData({...formData, level: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-md"
+                      className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                     >
                       <option value="beginner">Principiante</option>
                       <option value="intermediate">Intermedio</option>
@@ -345,7 +424,7 @@ const CoursesPage: React.FC = () => {
                     min="1"
                     value={formData.max_students}
                     onChange={(e) => setFormData({...formData, max_students: parseInt(e.target.value)})}
-                    className="w-full px-3 py-2 border rounded-md"
+                    className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                   />
                 </div>
 
@@ -357,8 +436,9 @@ const CoursesPage: React.FC = () => {
                     <input
                       type="date"
                       value={formData.start_date}
+                      min={todayStr}
                       onChange={(e) => setFormData({...formData, start_date: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-md"
+                      className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                     />
                   </div>
 
@@ -369,13 +449,14 @@ const CoursesPage: React.FC = () => {
                     <input
                       type="date"
                       value={formData.end_date}
+                      min={todayStr}
                       onChange={(e) => setFormData({...formData, end_date: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-md"
+                      className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4 border-t">
+                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100 mt-2">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}

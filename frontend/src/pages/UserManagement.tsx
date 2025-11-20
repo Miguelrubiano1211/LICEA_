@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useToast } from '../context/ToastContext';
 
 interface User {
   id: number;
@@ -28,6 +29,7 @@ const UserManagement: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState('');
   const [institutionFilter, setInstitutionFilter] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const { showToast } = useToast();
   const [newStatus, setNewStatus] = useState<boolean>(true);
 
   useEffect(() => {
@@ -74,11 +76,18 @@ const UserManagement: React.FC = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert(`✅ Estado actualizado exitosamente a: ${newStatus ? 'Activo' : 'Inactivo'}`);
+      showToast({
+        type: 'success',
+        title: 'Estado actualizado',
+        message: `Nuevo estado: ${newStatus ? 'Activo' : 'Inactivo'}`,
+      });
       setSelectedUser(null);
       fetchUsers();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al cambiar el estado');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.message || 'Error al cambiar el estado',
+      });
     }
   };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import axios from 'axios';
 
 interface Message {
@@ -37,6 +38,7 @@ interface GroupData {
 const GroupDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -73,7 +75,7 @@ const GroupDetail: React.FC = () => {
       setGroup(response.data.data);
     } catch (error) {
       console.error('Error fetching group:', error);
-      alert('Error al cargar el grupo');
+      showToast({ type: 'error', title: 'Error al cargar el grupo' });
       navigate('/dashboard/groups');
     } finally {
       setLoading(false);
@@ -109,7 +111,10 @@ const GroupDetail: React.FC = () => {
       setNewMessage('');
       await fetchMessages();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al enviar mensaje');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.message || 'Error al enviar mensaje',
+      });
     } finally {
       setSending(false);
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useToast } from '../context/ToastContext';
 
 interface Group {
   id: number;
@@ -25,6 +26,7 @@ const Groups: React.FC = () => {
   const navigate = useNavigate();
   const [groups, setGroups] = useState<Group[]>([]);
   const [availableGroups, setAvailableGroups] = useState<Group[]>([]);
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
@@ -108,12 +110,18 @@ const Groups: React.FC = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      alert(response.data.message || '¡Te has unido al grupo exitosamente!');
+      showToast({
+        type: 'success',
+        title: response.data.message || '¡Te has unido al grupo exitosamente!',
+      });
       setShowJoinModal(false);
       setJoinCode('');
       fetchGroups();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Código inválido o error al unirse');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.message || 'Código inválido o error al unirse',
+      });
     }
   };
 
@@ -149,7 +157,10 @@ const Groups: React.FC = () => {
       });
       fetchGroups();
     } catch (error: any) {
-      alert(error.response?.data?.error?.message || 'Error al crear el grupo');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.error?.message || 'Error al crear el grupo',
+      });
     }
   };
 
@@ -513,7 +524,10 @@ const Groups: React.FC = () => {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(createdGroupCode);
-                    alert('Código copiado al portapapeles!');
+                    showToast({
+                      type: 'success',
+                      title: 'Código copiado al portapapeles',
+                    });
                   }}
                   className="btn-secondary"
                 >

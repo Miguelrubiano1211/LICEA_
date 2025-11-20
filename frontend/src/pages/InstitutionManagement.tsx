@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useToast } from '../context/ToastContext';
 
 interface Institution {
   id: number;
@@ -16,6 +17,7 @@ interface Institution {
 const InstitutionManagement: React.FC = () => {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingInstitution, setEditingInstitution] = useState<Institution | null>(null);
   const [formData, setFormData] = useState({
@@ -58,7 +60,7 @@ const InstitutionManagement: React.FC = () => {
           formData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        alert('✅ Institución actualizada exitosamente');
+        showToast({ type: 'success', title: 'Institución actualizada exitosamente' });
       } else {
         // Crear
         await axios.post(
@@ -66,14 +68,17 @@ const InstitutionManagement: React.FC = () => {
           formData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        alert('✅ Institución creada exitosamente');
+        showToast({ type: 'success', title: 'Institución creada exitosamente' });
       }
 
       setShowModal(false);
       resetForm();
       fetchInstitutions();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al guardar la institución');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.message || 'Error al guardar la institución',
+      });
     }
   };
 
@@ -100,10 +105,13 @@ const InstitutionManagement: React.FC = () => {
       await axios.delete(`${baseURL}/institutions/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert('✅ Institución eliminada/desactivada exitosamente');
+      showToast({ type: 'success', title: 'Institución eliminada/desactivada exitosamente' });
       fetchInstitutions();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al eliminar la institución');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.message || 'Error al eliminar la institución',
+      });
     }
   };
 

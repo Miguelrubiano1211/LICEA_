@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import axios from 'axios';
 
 const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -53,6 +54,7 @@ const Tasks: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showGradeModal, setShowGradeModal] = useState(false);
+  const { showToast } = useToast();
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [myCourses, setMyCourses] = useState<any[]>([]);
   
@@ -77,9 +79,6 @@ const Tasks: React.FC = () => {
     grade: 0,
     feedback: ''
   });
-
-  // Valor mínimo para fechas (no permitir fechas vencidas)
-  const minDateTime = new Date().toISOString().slice(0, 16);
 
   useEffect(() => {
     fetchTasks();
@@ -147,7 +146,11 @@ const Tasks: React.FC = () => {
     if (taskForm.start_date) {
       const start = new Date(taskForm.start_date);
       if (start <= now) {
-        alert('La fecha y hora de inicio debe ser mayor a la fecha y hora actual.');
+        showToast({
+          type: 'error',
+          title: 'Fecha de inicio inválida',
+          message: 'La fecha y hora de inicio debe ser mayor a la fecha y hora actual.',
+        });
         return;
       }
     }
@@ -155,14 +158,22 @@ const Tasks: React.FC = () => {
     if (taskForm.due_date) {
       const end = new Date(taskForm.due_date);
       if (end <= now) {
-        alert('La fecha de entrega debe ser mayor a la fecha y hora actual.');
+        showToast({
+          type: 'error',
+          title: 'Fecha de entrega inválida',
+          message: 'La fecha de entrega debe ser mayor a la fecha y hora actual.',
+        });
         return;
       }
 
       if (taskForm.start_date) {
         const start = new Date(taskForm.start_date);
         if (end <= start) {
-          alert('La fecha de entrega debe ser mayor a la fecha de inicio de la tarea.');
+          showToast({
+            type: 'error',
+            title: 'Rango de fechas inválido',
+            message: 'La fecha de entrega debe ser mayor a la fecha de inicio de la tarea.',
+          });
           return;
         }
       }
@@ -177,7 +188,7 @@ const Tasks: React.FC = () => {
       });
       console.log('Task created successfully:', response.data);
       
-      alert('¡Tarea creada exitosamente!');
+      showToast({ type: 'success', title: '¡Tarea creada exitosamente!' });
       setShowCreateModal(false);
       setTaskForm({
         title: '',
@@ -196,7 +207,7 @@ const Tasks: React.FC = () => {
       const errorMsg = error.response?.data?.errors 
         ? error.response.data.errors.map((e: any) => e.msg).join(', ')
         : error.response?.data?.message || 'Error al crear la tarea';
-      alert(errorMsg);
+      showToast({ type: 'error', title: errorMsg });
     }
   };
 
@@ -223,7 +234,7 @@ const Tasks: React.FC = () => {
         }
       });
       
-      alert('¡Tarea entregada exitosamente!');
+      showToast({ type: 'success', title: '¡Tarea entregada exitosamente!' });
       setShowSubmitModal(false);
       setSubmissionForm({ submission_text: '', file: null });
       setSelectedTask(null);
@@ -236,7 +247,10 @@ const Tasks: React.FC = () => {
         window.location.reload();
       }, 1000);
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al entregar la tarea');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.message || 'Error al entregar la tarea',
+      });
     }
   };
 
@@ -251,7 +265,7 @@ const Tasks: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      alert('¡Calificación guardada!');
+      showToast({ type: 'success', title: '¡Calificación guardada!' });
       setShowGradeModal(false);
       setGradeForm({ grade: 0, feedback: '' });
       setSelectedSubmission(null);
@@ -259,7 +273,10 @@ const Tasks: React.FC = () => {
         fetchTaskDetails(selectedTask.id);
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al calificar');
+      showToast({
+        type: 'error',
+        title: error.response?.data?.message || 'Error al calificar',
+      });
     }
   };
 
@@ -338,9 +355,8 @@ const Tasks: React.FC = () => {
                   {getStatusBadge(task)}
                 </div>
                 <p className="text-sm text-gray-600 mb-2">{task.description}</p>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="mt-2 flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-gray-500 text-center">
                   <span>📚 {task.course_code} - {task.course_name}</span>
-                  {task.instructor_name && <span>👨‍🏫 {task.instructor_name}</span>}
                   <span>📅 Vence: {new Date(task.due_date).toLocaleDateString()}</span>
                   <span>🎯 Puntos: {task.max_grade}</span>
                 </div>
@@ -514,7 +530,6 @@ const Tasks: React.FC = () => {
                     <input
                       type="datetime-local"
                       required
-                      min={minDateTime}
                       value={taskForm.start_date}
                       onChange={(e) => setTaskForm({ ...taskForm, start_date: e.target.value })}
                       className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
@@ -528,7 +543,6 @@ const Tasks: React.FC = () => {
                     <input
                       type="datetime-local"
                       required
-                      min={minDateTime}
                       value={taskForm.due_date}
                       onChange={(e) => setTaskForm({ ...taskForm, due_date: e.target.value })}
                       className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
@@ -657,7 +671,7 @@ const Tasks: React.FC = () => {
       )}
 
       {/* Modal detalles de tarea */}
-      {selectedTask && !showSubmitModal && (
+      {selectedTask && !showSubmitModal && !showGradeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]">
           <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto border border-gray-200">
             <div className="p-6">
@@ -859,7 +873,7 @@ const Tasks: React.FC = () => {
 
       {/* Modal calificar */}
       {showGradeModal && selectedSubmission && selectedTask && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
